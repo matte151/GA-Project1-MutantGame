@@ -1,0 +1,97 @@
+*{
+    background-color: aliceblue;
+}
+body {
+    display: grid;
+    height: 100vh;
+    grid-template-rows: 70px 1fr;
+    margin: 0;
+    font-family: sans-serif;
+    
+} 
+
+nav {
+  display: flex;
+  flex-direction:row;
+  justify-content: flex-start;
+  align-content: center;
+  height: 70px;
+  background-color: #030591;
+
+}
+nav > div{
+  font-size: 40px;
+  margin: 10px;
+  background-color: #030591;
+  color: #cf9109;
+}
+nav > div:last-child {
+  margin-left: auto;
+  font-size: 20px;
+}
+
+.mainDiv {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    width: 100%;
+    height: 100%;
+}
+.badGuySprite {
+    background-color: #0de05e;
+    grid-area: 1/5/6/7;
+}
+.badGuyHealth {
+    background-color:transparent;
+    grid-area: 5/5/6/7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.goodGuySprite {
+    background-color: #01461b;
+    grid-area: 7/1/10/3;
+}
+.goodGuyHealth{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-area: 9/1/10/2;
+}
+.inputBar{
+    grid-area: 10/1/11/7;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+.attackButtonDiv {
+    grid-area: 1/1/2/2;
+}
+.attackButton{
+    height: 100%;
+    width: 100%;
+    background-color: #b39200;
+}
+.runDiv {
+    background-color: #930dad;
+    grid-area: 1/6/2/7;
+}
+.logo {
+    background-color: #99013b;
+    grid-area: 1/2/2/6;
+}
+#badGuyHealthMeter {
+    display: block;
+    width: 90%;
+    height: 25px;
+    background: none;
+    margin: 0 auto;
+}
+#goodGuyHealthMeter {
+    display: block;
+    width: 90%;
+    height: 25px;
+    background: none;
+    margin: 0 auto;
+
+}
