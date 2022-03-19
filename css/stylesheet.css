@@ -41,6 +41,14 @@ nav > div:last-child {
     background-color: #0de05e;
     grid-area: 1/5/6/7;
 }
+.attackResultDisplayGood{
+    background-color: #f55252;
+    grid-area: 7/3/8/4;
+}
+.attackResultDisplayBad{
+    background-color: #ddd232;
+    grid-area: 1/4/2/5;
+}
 .badGuyHealth {
     background-color:transparent;
     grid-area: 5/5/6/7;
