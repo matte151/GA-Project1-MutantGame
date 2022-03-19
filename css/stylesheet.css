@@ -63,6 +63,7 @@ nav > div:last-child {
 }
 .goodGuyHealth{
     display: flex;
+    background-color:transparent;
     justify-content: center;
     align-items: center;
     grid-area: 9/1/10/2;

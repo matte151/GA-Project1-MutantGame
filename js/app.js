@@ -14,31 +14,32 @@ class Warrior extends Player {
         this.weaponName = weaponName;
         this.weaponDmg = weaponDmg
         this.health = health;
-        this.items = [];
-        this.spells = [];
+        this.items = items;
+        this.spells = spells;
     }
-    swingWeapon() {
-        console.log("we swingin!")
+    gainXP() {
+        console.log("Help me Level Up!")
     }
 }
 //set up monster
 class Monster {
-    constructor (name, health, dmg, armor, xp, items) {
+    constructor (name, health, atkDmg, armor, xp, items) {
     this.name = name;
-    this.health = 100;
-    this.armor = 0;
-    this.xp = 100;
-    this.items = [];
-}
-    swingWeapon() {
-    console.log("we swingin!")
-}
+    this.health = health;
+    this.atkDmg = atkDmg;
+    this.armor = armor;
+    this.xp = xp;
+    this.items = items;
+    }
+    giveXP() {
+    console.log("I'm worth XPs and stuffs")
+    }
 }
 /*----- app's state (variables) -----*/
 //define a basic player and basic monster
 
-let newBadHealth = 50;
-let newGoodHealth = 75;
+let newBadHealth;
+let newGoodHealth;
 let attackResultGood = "";
 let attackResultBad = "";
 
@@ -58,18 +59,28 @@ document.querySelector('.inputBar').addEventListener('click', handleClick);
 document.querySelector('nav').addEventListener('click', handleNav);
 
 /*----- functions -----*/
-let player = new Warrior("Matt","Sword",10,100,"","");
-let badGuy = new Monster("Little Demon",50,10,0,100,"");
+let player;
+let badGuy;
 
-// function init() {
-//     let player = new Warrior("Matt","Sword",10,100,"","");
-//     let badGuy = new Monster("Little Demon",50,10,0,100,"");
-    
-// }
-// init();
-console.log(Player.name)
-console.log(player)
-console.log(badGuy)
+function init() {
+    player = new Warrior("Matt","Sword",10,100,[],[]);
+    badGuy = new Monster("Little Demon",50,10,0,100,[]);
+    goodGuyHealth.max = player.health
+    goodGuyHealth.min = 0
+    goodGuyHealth.value = player.health
+    goodGuyHealth.low = Math.floor(player.health*.3)
+    goodGuyHealth.high = Math.floor(player.health*.6)
+    goodGuyHealth.optimum = Math.floor(player.health*.75)
+    badGuyHealth.max = badGuy.health
+    badGuyHealth.min = 0
+    badGuyHealth.value = badGuy.health
+    badGuyHealth.low = Math.floor(badGuy.health*.3)
+    badGuyHealth.high = Math.floor(badGuy.health*.6)
+    badGuyHealth.optimum = Math.floor(badGuy.health*.75)
+}
+init();
+// console.log(player)
+// console.log(badGuy)
 
 function render(){
     badGuyHealth.value = newBadHealth;
@@ -89,19 +100,22 @@ function handleClick(e) {
         } else {
             console.log("wtf you clicking on?  This doesn't work!")
         }
-render();    
-}};
+render();
+}
+};
 //make an attack roll, check to see if it hits, if it does, then roll damage in a sperate function.  4 result (crit, hit/player block, both hit, player only hit)
 function doAttack(e) {
-    const dieRoll = Math.random()
+    const dieRoll = Math.random();
     if (dieRoll >.9) {
         attackResultGood = "Critical Hit!!";
         attackResultBad = "OUCH!!!";
-        doDamage(2);
+        doDamage(2)
+        takeDamage(0);
     } else if (dieRoll > 6) {
         attackResultGood = "Hit!";
         attackResultBad = "Swing, blocked!";
-        doDamage(1);
+        doDamage(1)
+        takeDamage(0);
     } else if (dieRoll >.2) {
         attackResultGood = "Hit!";
         attackResultBad = "Hit!";
@@ -110,25 +124,37 @@ function doAttack(e) {
     } else if (dieRoll >.05) {
         attackResultGood = "I miss!!";
         attackResultBad = "Hit!";
+        doDamage(0);
         takeDamage(1);
     } else {
         attackResultGood = "I miss!!";
         attackResultBad = "Critical Hit!";
+        doDamage(0);
         takeDamage(2);
     }
-    
-render()    
+   
 }
 function doDamage(e) {
+    // make them take damage, do not render here, we are returning back to the attack check, which renders there.
+    newBadHealth = Math.floor(badGuyHealth.value - (player.weaponDmg*e));
 
-
-render()    
+    return
 }
 function takeDamage(e) {
-
+ // make them take damage, do not render here, we are returning back to the attack check, which renders there.
+    newGoodHealth = Math.floor(goodGuyHealth.value - (badGuy.atkDmg*e));
+ 
+    return
 }
-function doRun(e) {
 
+
+function doRun(e) {
+    const dieRoll = Math.random();
+    if (dieRoll > .5) {
+        console.log("You run and live!");
+    } else {
+        console.log("You're cut down and die... sadness...")
+    }
 render()    
 }
 function handleNav(e) {
