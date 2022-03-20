@@ -37,12 +37,14 @@ class Monster {
 }
 /*----- app's state (variables) -----*/
 //define a basic player and basic monster
-
-let newBadHealth;
-let newGoodHealth;
+let startingGoodHealth;
+let startingBadHealth;
+let newBadHealth = "";
+let newGoodHealth = "";
 let attackResultGood = "";
 let attackResultBad = "";
-
+let player;
+let badGuy;
 
 /*----- cached element references -----*/
 const  badGuySprite = document.querySelector('.badGuySprite');
@@ -59,8 +61,7 @@ document.querySelector('.inputBar').addEventListener('click', handleClick);
 document.querySelector('nav').addEventListener('click', handleNav);
 
 /*----- functions -----*/
-let player;
-let badGuy;
+
 
 function init() {
     player = new Warrior("Matt","Sword",10,100,[],[]);
@@ -77,16 +78,19 @@ function init() {
     badGuyHealth.low = Math.floor(badGuy.health*.3)
     badGuyHealth.high = Math.floor(badGuy.health*.6)
     badGuyHealth.optimum = Math.floor(badGuy.health*.75)
+    startingGoodHealth = player.health;
+    startingBadHealth = badGuy.health;
+    render()
 }
 init();
 // console.log(player)
 // console.log(badGuy)
 
 function render(){
-    badGuyHealth.value = newBadHealth;
-    goodGuyHealth.value = newGoodHealth;
-    attackResultDisplayBad.innerText = attackResultBad
-    attackResultDisplayGood.innerText = attackResultGood
+    if (newBadHealth !== '') {badGuyHealth.value = newBadHealth;}
+    if (newGoodHealth !== '') {goodGuyHealth.value = newGoodHealth;}
+    if (attackResultBad !== '') {attackResultDisplayBad.innerText = attackResultBad;}
+    if (attackResultGood !== '') {attackResultDisplayGood.innerText = attackResultGood;}
 }
 
 function handleClick(e) {
@@ -158,6 +162,18 @@ function doRun(e) {
 render()    
 }
 function handleNav(e) {
-console.log(e.target)
+    if (e.target.innerText === "Play") {
+        if (confirm('Are you sure? ')) {
+            resetGame();
+        } else {
+            console.log("you were not")}
+        }
 render()    
+}
+function resetGame(e) {
+    newGoodHealth = startingGoodHealth;
+    newBadHealth = startingBadHealth;
+    attackResultBad = "You want to try again, pathetic human!";
+    attackResultGood = "I WILL NEVER SUBMIT!";
+    render()
 }

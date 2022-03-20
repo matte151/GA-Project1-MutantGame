@@ -1,5 +1,6 @@
 *{
     background-color: aliceblue;
+    font-family: 'Cinzel', serif;
 }
 body {
     display: grid;
@@ -21,7 +22,7 @@ nav {
 }
 nav > div{
   font-size: 40px;
-  margin: 10px;
+  margin: 10px 30px;
   background-color: #030591;
   color: #cf9109;
 }
@@ -38,7 +39,11 @@ nav > div:last-child {
     height: 100%;
 }
 .badGuySprite {
-    background-color: #0de05e;
+
+    background-image: url(../imgs/Bosses.gif);
+    background-size:300vw;
+    background-position-x: 103vw;
+    background-position-y: 215vh;
     grid-area: 1/5/6/7;
 }
 .attackResultDisplayGood{
@@ -58,7 +63,10 @@ nav > div:last-child {
 
 }
 .goodGuySprite {
-    background-color: #01461b;
+    background-image: url(../imgs/pixelKnight.png);
+    background-size:379vw;
+    background-position-x: 191vw;
+    background-position-y: 145vh;
     grid-area: 7/1/10/3;
 }
 .goodGuyHealth{
@@ -79,11 +87,20 @@ nav > div:last-child {
 .attackButton{
     height: 100%;
     width: 100%;
-    background-color: #b39200;
+    background-color: #030591;
+    color: #cf9109;
+    font-size:3.5em;
 }
 .runDiv {
     background-color: #930dad;
     grid-area: 1/6/2/7;
+}
+.runButton {
+    height: 100%;
+    width: 100%;
+    background-color: #030591;
+    color: #cf9109;
+    font-size:3.5em;
 }
 .logo {
     background-color: #99013b;
