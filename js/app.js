@@ -17,7 +17,7 @@ class Player {
 }
 //set up basic class starting with just a Mutant.
 class Mutant extends Player {
-    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic,imgLoc,imgSize,imgXPos,imgYPos) {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos) {
         super(name);
         this.health = health;
         this.rangedDmg = rangedDmg;
@@ -25,6 +25,7 @@ class Mutant extends Player {
         this.armor = armor;
         this.speed = speed;
         this.magic = magic;
+        this.level = level;
         this.imgLoc = imgLoc;
         this.imgSize = imgSize;
         this.imgXPos = imgXPos;
@@ -36,7 +37,7 @@ class Mutant extends Player {
 }
 //set up monster
 class Monster {
-    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, imgLoc,imgSize,imgXPos,imgYPos,action) {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos,action) {
     this.name = name;
     this.health = health;
     this.meleeDmg = meleeDmg;
@@ -44,6 +45,7 @@ class Monster {
     this.armor = armor;
     this.speed = speed;
     this.magic = magic;
+    this.level = level;
     this.imgLoc = imgLoc;
     this.imgSize = imgSize;
     this.imgXPos = imgXPos;
@@ -54,16 +56,23 @@ class Monster {
     console.log("I'm worth XPs and stuffs")
     }
 }
+
+
 /*----- app's state (variables) -----*/
 //define a basic player and basic monster
-let startingGoodHealth;
-let startingBadHealth;
+// let startingGoodHealth;
+// let startingBadHealth;
 let newBadHealth = "";
 let newGoodHealth = "";
 let attackResultGood = "";
 let attackResultBad = "";
 let player;
 let badGuy;
+let availableChoices = []; //choices for player mutations will be pushed into here.
+let availablePrey = []; //choices for prey animals will be pushed in here, and shifted out based on level.  Only 3 ever, so the push one will have to shift one out too.
+let availableAttackers = []; // potential monsters that attack us on the way to prey monsters, or after we kill the prey monster.  Keep this to 2-3 at MAX and level relevant.
+
+
 
 
 /*----- cached element references -----*/
@@ -76,39 +85,67 @@ const attackResultDisplayGood = document.querySelector('.attackResultDisplayGood
 const meleeButton = document.querySelector('.meleeButton');
 const rangedButton = document.querySelector('.rangedButton');
 const spellButton = document.querySelector('.spellButton');
+const anyModal = document.querySelector('.modal')
+const choosePreyModal = document.querySelector('#choosePreyModal')
+const spanClose = document.querySelector('.close');
+
 
 /*----- event listeners -----*/
 //main bar for attacking etc.
 document.querySelector('.inputBar').addEventListener('click', handleClick);
 //main nav for spells and stuff (Stretch!!!!)
 document.querySelector('nav').addEventListener('click', handleNav);
+//this is to close ANY modal box.  First one is by clicking the x the second is by clicking off..
+spanClose.onclick = function() {
+    anyModal.style.display = "none";
+  }
+window.onclick = function(event) {
+   if (event.target == anyModal) {
+    anyModal.style.display = "none";
+  }
+}
 
 /*----- functions -----*/
 
 //set up initial stuff
 function init() {
-    // (name, health, meleeDmg, rangedDmg, armor, speed, magic)
-    player = new Mutant("Spawnling",100,5,1,0,1,0,"url(imgs/pixelKnight.png)","333vw","169vw","78vw");
-    badGuy = new Monster("Rabbit",20,100,0,0,2,0,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    // (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize, imgX, imgY,action)
+    let mutantSpawnling = new Mutant("Spawnling",50,5,1,0,1,0,1,"url(imgs/pixelKnight.png)","333vw","169vw","78vw");
+    let monsterRabbit = new Monster("Rabbit",5,2,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
+    let monsterDeer = new Monster("Deer",10,5,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterSquirrel = new Monster("Squirrel",5,0,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterBadger = new Monster("Badget",20,10,0,2,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterSheep = new Monster("Sheep",20,0,0,2,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterBear = new Monster("Bear",85,10,0,3,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterWolf = new Monster("Wolf",50,8,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterPixie = new Monster("Pixie",25,0,0,0,3,5,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterAnteater = new Monster("Anteater",25,5,0,5,2,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterTurtle = new Monster("Turtle",85,10,0,10,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantBee = new Monster("Giant Bee",50,15,0,1,5,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantSpider = new Monster("Giant Spider",100,5,10,3,3,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantAnt = new Monster("Giant Ant",85,15,0,5,2,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterDireBear = new Monster("Dire Bear",150,20,0,10,3,0,5,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    player = mutantSpawnling;
+    badGuy = monsterRabbit;
     badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
-    goodGuyHealth.max = player.health
-    goodGuyHealth.min = 0
-    goodGuyHealth.value = player.health
-    goodGuyHealth.low = Math.floor(player.health*.3)
-    goodGuyHealth.high = Math.floor(player.health*.6)
-    goodGuyHealth.optimum = Math.floor(player.health*.75)
-    badGuyHealth.max = badGuy.health
-    badGuyHealth.min = 0
-    badGuyHealth.value = badGuy.health
-    badGuyHealth.low = Math.floor(badGuy.health*.3)
-    badGuyHealth.high = Math.floor(badGuy.health*.6)
-    badGuyHealth.optimum = Math.floor(badGuy.health*.75)
-    startingGoodHealth = player.health;
-    startingBadHealth = badGuy.health;
+    goodGuyHealth.max = player.health;
+    goodGuyHealth.min = 0;
+    goodGuyHealth.value = player.health;
+    goodGuyHealth.low = Math.floor(player.health*.3);
+    goodGuyHealth.high = Math.floor(player.health*.5);
+    goodGuyHealth.optimum = Math.floor(player.health*.85);
+    badGuyHealth.max = badGuy.health;
+    badGuyHealth.min = 0;
+    badGuyHealth.value = badGuy.health;
+    badGuyHealth.low = Math.floor(badGuy.health*.3);
+    badGuyHealth.high = Math.floor(badGuy.health*.6);
+    badGuyHealth.optimum = Math.floor(badGuy.health*.8);
+    // startingGoodHealth = player.health;
+    // startingBadHealth = badGuy.health;
     meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
     rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
     spellButton.innerText = `Spell (${Math.floor(player.magic*.5)} - ${player.magic})`;
-    render()
+    render();
 }
 init();
 // console.log(player)
@@ -252,6 +289,7 @@ badGuy.imgLoc = "url(imgs/deathEffect.png)";
 badGuy.imgSize = "130vw"; 
 badGuy.imgXPos = "0vw";
 badGuy.imgYPos = "-4vw";
+choosePreyModal.style.display = "block";
 }
 function resetGame(e) {
 init()
