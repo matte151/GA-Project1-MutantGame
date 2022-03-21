@@ -1,4 +1,12 @@
 // console.log("JS Linked")
+// add a score points
+// add evolution points
+// add stats for armor, speed, health, Melee damage, Ranged damage, magic?
+// add types of things to evolve into
+// add ability to pick bad guys to eat
+// add ability to get boosts from bad guys.
+// top end: Phoenix(magic), Dragon (Range Damage), Some kind of turtle thing(Armor)
+// top end: Chinese Dragon(Speed), Tiger (Melee Damage), Health (Treant)
 
 /*----- constants -----*/
 //set up class structure with basic name.
@@ -7,15 +15,20 @@ class Player {
     this.name = name;
 }
 }
-//set up basic class starting with just a warrior.
-class Warrior extends Player {
-    constructor (name, weaponName, weaponDmg, health, items, spells) {
+//set up basic class starting with just a Mutant.
+class Mutant extends Player {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic,imgLoc,imgSize,imgXPos,imgYPos) {
         super(name);
-        this.weaponName = weaponName;
-        this.weaponDmg = weaponDmg
         this.health = health;
-        this.items = items;
-        this.spells = spells;
+        this.rangedDmg = rangedDmg;
+        this.meleeDmg = meleeDmg;
+        this.armor = armor;
+        this.speed = speed;
+        this.magic = magic;
+        this.imgLoc = imgLoc;
+        this.imgSize = imgSize;
+        this.imgXPos = imgXPos;
+        this.imgYPos = imgYPos;
     }
     gainXP() {
         console.log("Help me Level Up!")
@@ -23,15 +36,21 @@ class Warrior extends Player {
 }
 //set up monster
 class Monster {
-    constructor (name, health, atkDmg, armor, xp, items) {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, imgLoc,imgSize,imgXPos,imgYPos,action) {
     this.name = name;
     this.health = health;
-    this.atkDmg = atkDmg;
+    this.meleeDmg = meleeDmg;
+    this.rangedDmg = rangedDmg;
     this.armor = armor;
-    this.xp = xp;
-    this.items = items;
+    this.speed = speed;
+    this.magic = magic;
+    this.imgLoc = imgLoc;
+    this.imgSize = imgSize;
+    this.imgXPos = imgXPos;
+    this.imgYPos = imgYPos;
+    this.action = action;
     }
-    giveXP() {
+    checkAction() {
     console.log("I'm worth XPs and stuffs")
     }
 }
@@ -46,13 +65,17 @@ let attackResultBad = "";
 let player;
 let badGuy;
 
+
 /*----- cached element references -----*/
-const  badGuySprite = document.querySelector('.badGuySprite');
-const  goodGuySprite = document.querySelector('.goodGuySprite');
-const  badGuyHealth = document.querySelector('#badGuyHealthMeter');
-const  goodGuyHealth = document.querySelector('#goodGuyHealthMeter');
-const  attackResultDisplayBad = document.querySelector('.attackResultDisplayBad');
-const  attackResultDisplayGood = document.querySelector('.attackResultDisplayGood');
+const badGuySprite = document.querySelector('.badGuySprite');
+const goodGuySprite = document.querySelector('.goodGuySprite');
+const badGuyHealth = document.querySelector('#badGuyHealthMeter');
+const goodGuyHealth = document.querySelector('#goodGuyHealthMeter');
+const attackResultDisplayBad = document.querySelector('.attackResultDisplayBad');
+const attackResultDisplayGood = document.querySelector('.attackResultDisplayGood');
+const meleeButton = document.querySelector('.meleeButton');
+const rangedButton = document.querySelector('.rangedButton');
+const spellButton = document.querySelector('.spellButton');
 
 /*----- event listeners -----*/
 //main bar for attacking etc.
@@ -62,10 +85,12 @@ document.querySelector('nav').addEventListener('click', handleNav);
 
 /*----- functions -----*/
 
-
+//set up initial stuff
 function init() {
-    player = new Warrior("Matt","Sword",10,100,[],[]);
-    badGuy = new Monster("Little Demon",50,10,0,100,[]);
+    // (name, health, meleeDmg, rangedDmg, armor, speed, magic)
+    player = new Mutant("Spawnling",100,5,1,0,1,0,"url(imgs/pixelKnight.png)","333vw","169vw","78vw");
+    badGuy = new Monster("Rabbit",20,100,0,0,2,0,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
     goodGuyHealth.max = player.health
     goodGuyHealth.min = 0
     goodGuyHealth.value = player.health
@@ -80,6 +105,9 @@ function init() {
     badGuyHealth.optimum = Math.floor(badGuy.health*.75)
     startingGoodHealth = player.health;
     startingBadHealth = badGuy.health;
+    meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
+    rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
+    spellButton.innerText = `Spell (${Math.floor(player.magic*.5)} - ${player.magic})`;
     render()
 }
 init();
@@ -87,71 +115,113 @@ init();
 // console.log(badGuy)
 
 function render(){
-    if (newBadHealth !== '') {badGuyHealth.value = newBadHealth;}
-    if (newGoodHealth !== '') {goodGuyHealth.value = newGoodHealth;}
-    if (attackResultBad !== '') {attackResultDisplayBad.innerText = attackResultBad;}
-    if (attackResultGood !== '') {attackResultDisplayGood.innerText = attackResultGood;}
+    badGuyHealth.value = badGuy.health;
+    goodGuyHealth.value = player.health;
+    attackResultDisplayBad.innerText = attackResultBad;
+    attackResultDisplayGood.innerText = attackResultGood;
+   //update bad guy sprite
+    badGuySprite.style.backgroundImage = badGuy.imgLoc;
+    badGuySprite.style.backgroundSize = badGuy.imgSize; 
+    badGuySprite.style.backgroundPositionX = badGuy.imgXPos;
+    badGuySprite.style.backgroundPositionY = badGuy.imgYPos;
+    //update good guy sprite
+    goodGuySprite.style.backgroundImage = player.imgLoc;
+    goodGuySprite.style.backgroundSize = player.imgSize; 
+    goodGuySprite.style.backgroundPositionX = player.imgXPos;
+    goodGuySprite.style.backgroundPositionY = player.imgYPos;
+    goodGuySprite.innerText = player.name; // comment me out later
 }
 
 function handleClick(e) {
     if (e.target.tagName === "BUTTON") {
         // console.log(e.target.tagName)
-      
-        if (e.target.className === "attackButton") {
-            doAttack();
-        } else if (e.target.className === "runButton") {
-            doRun();
-        } else {
-            console.log("wtf you clicking on?  This doesn't work!")
-        }
+          if (e.target.className === "meleeButton") {doAttack(player.meleeDmg,1);}
+          if (e.target.className === "rangedButton") {doAttack(player.rangedDmg,1);}
+          if (e.target.className === "spellButton") {doAttack(player.magic, 0);}
+          if (e.target.className === "runButton") {doRun(player.speed);}
+          doBadGuyAction();
 render();
 }
 };
+//initiative check??? Stretch, might be nice to stick that in, it'd be cool
+
 //make an attack roll, check to see if it hits, if it does, then roll damage in a sperate function.  4 result (crit, hit/player block, both hit, player only hit)
-function doAttack(e) {
+function doAttack(e, f) {
     const dieRoll = Math.random();
-    if (dieRoll >.9) {
+    if (dieRoll >.8) {
         attackResultGood = "Critical Hit!!";
-        attackResultBad = "OUCH!!!";
-        doDamage(2)
-        takeDamage(0);
-    } else if (dieRoll > 6) {
+        damageBad(2*e, e, f)
+    } else if (dieRoll > .5) {
         attackResultGood = "Hit!";
-        attackResultBad = "Swing, blocked!";
-        doDamage(1)
-        takeDamage(0);
-    } else if (dieRoll >.2) {
-        attackResultGood = "Hit!";
-        attackResultBad = "Hit!";
-        doDamage(1);
-        takeDamage(1);
-    } else if (dieRoll >.05) {
-        attackResultGood = "I miss!!";
-        attackResultBad = "Hit!";
-        doDamage(0);
-        takeDamage(1);
+         damageBad(e,.5*e, f)
+    } else if (dieRoll >.15) {
+        attackResultGood = "Glancing Hit!";
+        damageBad(.5*e,0, f);
     } else {
         attackResultGood = "I miss!!";
-        attackResultBad = "Critical Hit!";
-        doDamage(0);
-        takeDamage(2);
+        damageBad(0, 0, f);
     }
-   
 }
-function doDamage(e) {
+function doBadGuyAction(e) {
+    //Run if it's a run action
+    if (badGuy.action === "run") {
+        if (Math.random()*badGuy.speed > Math.random()*player.speed) {doEnemyRan()} 
+    }
+    //Melee Attack
+    if (badGuy.action === "meleeAttack") {
+        const dieRoll = Math.random();
+        if (dieRoll >.9) {
+            attackResultBad = "Crit!!!";
+            damagePlayer(2*badGuy.meleeDmg, badGuy.meleeDmg,1);
+        } else if (dieRoll > .6) {
+            attackResultBad = "Hit";
+            damagePlayer(1*badGuy.meleeDmg,badGuy.meleeDmg*.25,1);
+        } else if (dieRoll >.3) {
+            attackResultBad = "Glancing Hit!";
+            damagePlayer(.5*badGuy.meleeDmg,0,1);
+        } else {
+            attackResultBad = "miss";
+            damagePlayer(0*badGuy.meleeDmg,0,1);
+        }
+    }
+    //Ranged Attack
+
+    //Spell Attack
+
+}
+
+function damageBad(e, f, g) {
     // make them take damage, do not render here, we are returning back to the attack check, which renders there.
-    newBadHealth = Math.floor(badGuyHealth.value - (player.weaponDmg*e));
-
+    newBadHealth = Math.floor(badGuyHealth.value - ((Math.random() * e + f)-badGuy.armor*g));
+    badGuy.health = newBadHealth
+    if(badGuy.health <= 0) {doBadGuyDies()}
     return
 }
-function takeDamage(e) {
+function damagePlayer(e, f, g) {
  // make them take damage, do not render here, we are returning back to the attack check, which renders there.
-    newGoodHealth = Math.floor(goodGuyHealth.value - (badGuy.atkDmg*e));
- 
+    newGoodHealth = Math.floor(goodGuyHealth.value - ((Math.random() * e + f)-player.armor*g));
+    player.health = newGoodHealth
+    if(player.health<=0) {doPlayerDies()}
     return
 }
 
-
+function doEnemyRan(e) {
+    const playerSpeed = Math.random()*player.speed
+    const badSpeed = Math.random()*badGuy.speed
+    const dmgTaken = Math.max(player.meleeDmg,player.rangedDmg,player.magic)
+    if( playerSpeed > .25+badSpeed){damageBad(dmgTaken*2,dmgTaken,0)}
+    if( playerSpeed > badSpeed){damageBad(dmgTaken,dmgTaken*.5,0)}
+    if( badSpeed >= playerSpeed){damageBad(dmgTaken*.5,0,0)}
+    if( badSpeed >= .25+playerSpeed){doEnemyGetsAway()}
+    //get new choices and stuff here.
+};
+function doEnemyGetsAway() {
+    badGuy.imgLoc = "";
+    badGuy.imgSize = "";
+    badGuy.imgXPos = "";
+    badGuy.imgYPos = "";
+    //get new monster and stuff.
+};
 function doRun(e) {
     const dieRoll = Math.random();
     if (dieRoll > .5) {
@@ -170,10 +240,20 @@ function handleNav(e) {
         }
 render()    
 }
+function doPlayerDies(){
+    player.imgLoc = "url(imgs/deathEffect.png)";
+    player.imgSize = "130vw";
+    player.imgXPos = "0vw";
+    player.imgYPos = "-4vw";
+    //add in something else for a "Game over" type screen or something...
+}
+function doBadGuyDies() {
+badGuy.imgLoc = "url(imgs/deathEffect.png)";
+badGuy.imgSize = "130vw"; 
+badGuy.imgXPos = "0vw";
+badGuy.imgYPos = "-4vw";
+}
 function resetGame(e) {
-    newGoodHealth = startingGoodHealth;
-    newBadHealth = startingBadHealth;
-    attackResultBad = "You want to try again, pathetic human!";
-    attackResultGood = "I WILL NEVER SUBMIT!";
+init()
     render()
 }
