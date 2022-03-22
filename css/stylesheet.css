@@ -78,6 +78,7 @@ nav > div:last-child {
     grid-area: 10/1/11/7;
     display:grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    border: 2px solid #b2c5dd;
 }
 .meleeButtonDiv {
     grid-area: 1/1/2/2;
@@ -114,9 +115,11 @@ nav > div:last-child {
     background-color: #030591;
     font-size:3em;
 }
-.logo {
-    background-color: #99013b;
+.log {
+    color: #6e0505;
+    font-size: 2em;
     grid-area: 1/4/2/6;
+
 }
 #badGuyHealthMeter {
     display: block;

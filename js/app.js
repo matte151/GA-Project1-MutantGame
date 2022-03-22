@@ -15,7 +15,7 @@ class Player {
     this.name = name;
 }
 }
-
+const pauseInterval = 500
 //set up basic class starting with just a Mutant.
 class Mutant extends Player {
     constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos) {
@@ -62,14 +62,16 @@ class Monster {
 
 /*----- app's state (variables) -----*/
 //define a basic player and basic monster
-// let startingGoodHealth;
-// let startingBadHealth;
-let newBadHealth = "";
-let newGoodHealth = "";
-let attackResultGood = "";
-let attackResultBad = "";
+let startingGoodHealth;
+let startingBadHealth;
+let newBadHealth;
+let newGoodHealth;
+let attackResultGood;
+let attackResultBad;
+let nextMonster;
 let player;
 let badGuy;
+let newBattleText;
 // let availableChoices = []; //choices for player mutations will be pushed into here. - no no they won't, otherwise it will just grow forever.  It should be in a const in the function.
 // let availablePrey = []; //choices for prey animals will be pushed in here, and shifted out based on level.  Only 3 ever, so the push one will have to shift one out too.
 let availableAttackers = []; // potential monsters that attack us on the way to prey monsters, or after we kill the prey monster.  Keep this to 2-3 at MAX and level relevant.
@@ -98,7 +100,8 @@ const preySelect3 = document.querySelector('#preySelect3')
 const healthMeter = document.querySelector('.healthMeter')
 const mutationSelect1 = document.querySelector('#mutationSelect1')
 const mutationSelect2 = document.querySelector('#mutationSelect2')
-const mutationSelect3 = document.querySelector('#mutationSelect3') 
+const mutationSelect3 = document.querySelector('#mutationSelect3')
+const battleLog = document.querySelector('.log')
 
 
 /*----- event listeners -----*/
@@ -108,19 +111,19 @@ document.querySelector('.inputBar').addEventListener('click', handleClick);
 document.querySelector('nav').addEventListener('click', handleNav);
 //this is to close ANY modal box.  First one is by clicking the x the second is by clicking off..
 //modal button listener and stuff?
-anyModal.addEventListener('click', handleModalClick)
-closePrey.onclick = function() {
-    choosePreyModal.style.display = "none";
-  }
-closeMutation.onclick = function() {
-    chooseMutationModal.style.display = "none";
-  }
-window.onclick = function(event) {
-   if (event.target == choosePreyModal) {choosePreyModal.style.display = "none";}
-   if (event.target == chooseMutationModal) {chooseMutationModal.style.display = "none";}
-
-
-}
+choosePreyModal.addEventListener('click', handlePreyModalClick)
+chooseMutationModal.addEventListener('click', handleMutationModalClick)
+// closePrey.onclick = function() {
+//     choosePreyModal.style.display = "none";
+//   }
+// closeMutation.onclick = function() {
+//     chooseMutationModal.style.display = "none";
+//   }
+// window.onclick = function(event) {
+//    if (event.target == choosePreyModal) {choosePreyModal.style.display = "none";}
+//    if (event.target == chooseMutationModal) {chooseMutationModal.style.display = "none";}
+// //commenting this out because I want you to HAVE to select those things.
+// }
 // use this to make health appear on the meter maybe?
 healthMeter.addEventListener('onMouseOver', handleHealthMeter);
 
@@ -131,21 +134,25 @@ function init() {
     // (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize, imgX, imgY,action)
     let mutantSpawnling = new Mutant("Spawnling",50,5,1,0,1,0,1,"url(imgs/pixelKnight.png)","333vw","169vw","78vw");
     let monsterRabbit = new Monster("Rabbit",5,2,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
-    let monsterDeer = new Monster("Deer",10,5,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterSquirrel = new Monster("Squirrel",5,0,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterDeer = new Monster("Deer",20,5,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterSquirrel = new Monster("Squirrel",15,0,2,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
     let monsterBadger = new Monster("Badger",20,10,0,2,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
     let monsterSheep = new Monster("Sheep",20,0,0,2,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterBear = new Monster("Bear",85,10,0,3,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterWolf = new Monster("Wolf",50,8,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterPixie = new Monster("Pixie",25,0,0,0,3,5,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterBear = new Monster("Bear",100,15,0,3,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterWolf = new Monster("Wolf",50,10,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterPixie = new Monster("Pixie",25,0,0,0,3,5,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
     let monsterAnteater = new Monster("Anteater",25,5,0,5,2,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
     let monsterTurtle = new Monster("Turtle",85,10,0,10,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantBee = new Monster("Giant Bee",50,15,0,1,5,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantSpider = new Monster("Giant Spider",100,5,10,3,3,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantAnt = new Monster("Giant Ant",85,15,0,5,2,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterDireBear = new Monster("Dire Bear",150,20,0,10,3,0,5,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantBee = new Monster("GiantBee",150,35,0,1,5,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantSpider = new Monster("GiantSpider",200,25,10,3,3,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterGiantAnt = new Monster("GiantAnt",185,25,0,5,2,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let monsterDireBear = new Monster("DireBear",350,50,0,10,3,0,5,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
     player = mutantSpawnling;
     badGuy = monsterRabbit;
+    startingGoodHealth = player.health;
+    startingBadHealth = badGuy.health;
+    console.log(`init starting bad health = ${startingBadHealth}`)
+    console.log(`init badGuy.health = ${badGuy.health}`)
     goodGuyHealth.max = player.health;
     goodGuyHealth.min = 0;
     goodGuyHealth.value = player.health;
@@ -161,6 +168,7 @@ function init() {
     meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
     rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
     spellButton.innerText = `Spell (${Math.floor(player.magic*.5)} - ${player.magic})`;
+    newBattleText = "Battle Log:"
     render();
 }
 init();
@@ -184,6 +192,7 @@ function render(){
     goodGuySprite.style.backgroundPositionX = player.imgXPos;
     goodGuySprite.style.backgroundPositionY = player.imgYPos;
     goodGuySprite.innerText = player.name; // comment me out later
+    battleLog.innerText = newBattleText
 }
 
 function handleClick(e) {
@@ -193,6 +202,8 @@ function handleClick(e) {
           if (e.target.className === "rangedButton") {doAttack(player.rangedDmg,1);}
           if (e.target.className === "spellButton") {doAttack(player.magic, 0);}
           if (e.target.className === "runButton") {doRun(player.speed);}
+            e.target.disabled=true;
+    setTimeout(function(){e.target.disabled=false;},pauseInterval)
 render();
 }
 };
@@ -218,8 +229,12 @@ function doAttack(e, f) {
 function doBadGuyAction(e) {
     //Run if it's a run action
     if (badGuy.action === "run") {
-        if (Math.random()*badGuy.speed > Math.random()*player.speed) {doEnemyRan()} 
-    } else { doEnemyRunFail()}
+        newBattleText = "Your prey tries to run!"
+        render();
+        setInterval(function(){ 
+            if (Math.random()*badGuy.speed > Math.random()*player.speed) {doEnemyRan()} else {doEnemyRunFail()}
+        })
+    }
     //Melee Attack
     if (badGuy.action === "meleeAttack") {doBadGuyAttack(badGuy.meleeDmg,1)}
     //Ranged Attack
@@ -261,28 +276,37 @@ function doEnemyRan(e) {
     const playerSpeed = Math.random()*player.speed
     const badSpeed = Math.random()*badGuy.speed
     const dmgTaken = Math.max(player.meleeDmg,player.rangedDmg,player.magic)
-    if( playerSpeed > .25+badSpeed){damageBadGuy(dmgTaken*2,dmgTaken,0)}
-    if( playerSpeed > badSpeed){damageBadGuy(dmgTaken,dmgTaken*.5,0)}
-    if( badSpeed >= playerSpeed){damageBadGuy(dmgTaken*.5,0,0)}
-    if( badSpeed >= .25+playerSpeed){doEnemyGetsAway()}
+    if (playerSpeed > .25+badSpeed){damageBadGuy(dmgTaken*2,dmgTaken,0)}
+    if (playerSpeed > badSpeed){damageBadGuy(dmgTaken,dmgTaken*.5,0)}
+    if (badSpeed >= playerSpeed){damageBadGuy(dmgTaken*.5,0,0)}
+    if (badSpeed >= .25+playerSpeed){doEnemyGetsAway()}
     //get new choices and stuff here.
 };
 function doEnemyRunFail(){
- //what happens if the enemy fails to run.  Mainly just an image jiggle? Maybe? and nothing...
+    newBattleText = "They failed to run away!"
 }
 function doEnemyGetsAway() {
+    newBattleText = "They got away!"   
     badGuy.imgLoc = "";
     badGuy.imgSize = "";
     badGuy.imgXPos = "";
     badGuy.imgYPos = "";
-    //get new monster and stuff.
+    setTimeout(function() {getPrey()},pauseInterval)
 };
 function doRun(e) {
-    const dieRoll = Math.random();
-    if (dieRoll > .5) {
-        console.log("You run and live!");
+    if (badGuy.action === "run") {
+        newBattleText = "You get away!"
+        setTimeout(function() {getPrey()},pauseInterval)
     } else {
-        console.log("You're cut down and die... sadness...")
+            const playerSpeed = Math.random()*player.speed
+            const badSpeed = Math.random()*badGuy.speed
+         if (playerSpeed > badSpeed) {
+            newBattleText = "You get away!"
+            setTimeout(function() {getPrey()},pauseInterval)
+        } else {
+            newBattleText = "You fail to get away!"
+            setTimeout(function() {doBadGuyAction()},pauseInterval)
+        }
     }
 render()    
 }
@@ -304,22 +328,25 @@ function doPlayerDies(){
     //add in something else for a "Game over" type screen or something...
 }
 function doBadGuyDies() {
-    //Change the bad guy picture, render it, and give the player some upgrades.
+    //Change the bad guy picture, reset the health, render it, and give the player some upgrades.
     badGuy.imgLoc = "url(imgs/deathEffect.png)";
     badGuy.imgSize = "130vw"; 
     badGuy.imgXPos = "0vw";
     badGuy.imgYPos = "-4vw";
-    
-    render();
-    
-    getUpgrades();
+    console.log(`doBadGuyDies starting bad health = ${startingBadHealth}`)
+    console.log(`doBadGuyDies badGuy.health = ${badGuy.health}`)
+    badGuy.health = startingBadHealth;
+    if (badGuy.name === "DireBear") {doWinGame()}{
+        render();
+        getUpgrades();  
+    }
+
 }
 function resetGame(e) {
     init()
 }
 function getUpgrades() {
     const availableChoices = [];
-    availableChoices.push('health')
     for (const property in badGuy) {
         if (badGuy[property] > 0 && property !=='level') {
             availableChoices.push(property)
@@ -341,10 +368,10 @@ function createUpgradeBoxes(e) {
     mutationSelect3.innerText = e[2]
     choosePreyModal.style.display = "none"
     chooseMutationModal.style.display = "block";
-    // getPrey();
+
 }
 function getPrey(e) {
-    // console.log(Monster.allInstances)
+
     const availablePrey = Monster.allInstances.filter(function(e){
         return e.level <= player.level    
     })
@@ -363,10 +390,49 @@ function createPreyBoxes(e) {
     chooseMutationModal.style.display = "none";
     choosePreyModal.style.display = "block";
 }
-function handleModalClick(e) {
-    console.log(e.target)
+function handleMutationModalClick(e) {
+    // console.log(e.target.innerText)
+    if (e.target.tagName === "BUTTON") {
+        const selection = e.target.innerText
+        if (selection === 'health') {
+             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.5+.5)),1)
+        } else {
+             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.75+.25)),1)    
+            }
+        chooseMutationModal.style.display = "none";
+        getPrey()
+    }   
 }
+function handlePreyModalClick(e) {
+    if (e.target.tagName === "BUTTON") {
+        let monsterHolder;
+        const currentMonsterName = e.target.innerText
+        if (Math.random() > .5) {
+            monsterHolder = Monster.allInstances.filter(function(e){
+                return e.name === currentMonsterName})
+            nextMonster = monsterHolder[0]
+        } else {
+            let newPredator = Monster.allInstances.filter(function(e){
+                return e.level <= player.level + 2 &&  e.level >= player.level && e.action !== "run"
+                })
+                console.log(newPredator)
+            nextMonster = newPredator[Math.floor(Math.random()*newPredator.length)]
 
+            //This grabs up an array of all the monsters, then randomly picks one that is up to 2 levels higher than the player, and doesn't run.
+            }
+        badGuy = nextMonster
+        // console.log(`handlePreyModal starting bad health = ${startingBadHealth}`)
+        // console.log(`HandlePReyModal badGuy.health = ${badGuy.health}`)
+        startingBadHealth = badGuy.health
+        newBattleText = `A wild ${badGuy.name} appears! (sorry couldn't help it...)`
+        choosePreyModal.style.display = "none";
+        render()
+    }
+}
 function handleHealthMeter(e) {
     //this should create a little pop up above the health meter to show the health values.
+}
+function doWinGame() {
+    newBattleText = "You have become the apex predator!  Congratulations!"
+    render()
 }
