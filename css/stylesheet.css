@@ -124,6 +124,7 @@ nav > div:last-child {
     height: 25px;
     background: none;
     margin: 0 auto;
+    
 }
 #goodGuyHealthMeter {
     display: block;
@@ -133,6 +134,7 @@ nav > div:last-child {
     margin: 0 auto;
 
 }
+/*this next part controls the modal box.  The first one says it sits on top of everything, and then the second has the content, then closes it etc.  Change display:none if you want it to show up.*/
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -148,23 +150,42 @@ nav > div:last-child {
   
   /* Modal Content/Box */
   .modal-content {
-    background-color: #fefefe;
+    background-color: #d6e8fa;
     margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 2px solid #888;
-    width: 60%; /* Could be more or less, depending on screen size */
+    width: 70%; /* Could be more or less, depending on screen size */
     border-radius: 15px;
   }
-  
+  .modalPrompt {
+    width: 80%;
+    margin: 2% auto;
+    font-size:1.5em;
+    background-color: #030591;
+    text-align: center;
+  }
+  .modalButtons {
+      display: inline;
+      margin: 5% 5% auto;
+      padding: 3%;
+      background-color: #030591;
+      font-size:1.5em;
+  }
   /* The Close Button */
   .close {
-    color: #aaa;
+    height: 30px;
+    width: 30px;
+    background-color: #d6e8fa;
+    /* background-color: #030591; */
+    color: #030591;
     float: right;
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;
+    text-align: center;
+   
   }
   .close:hover, .close:focus {
-    color: black;
+    color: #fab41c;
     text-decoration: none;
     cursor: pointer;
   }
