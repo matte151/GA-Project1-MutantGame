@@ -15,10 +15,10 @@ class Player {
     this.name = name;
 }
 }
-const pauseInterval = 1000
+const pauseInterval = 500
 //set up basic class starting with just a Mutant.
 class Mutant extends Player {
-    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos) {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgPos) {
         super(name);
         this.health = health;
         this.rangedDmg = rangedDmg;
@@ -29,8 +29,7 @@ class Mutant extends Player {
         this.level = level;
         this.imgLoc = imgLoc;
         this.imgSize = imgSize;
-        this.imgXPos = imgXPos;
-        this.imgYPos = imgYPos;
+        this.imgPos = imgPos;
     }
     gainXP() {
         console.log("Help me Level Up!")
@@ -38,7 +37,7 @@ class Mutant extends Player {
 }
 //set up monster
 class Monster {
-    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos,action) {
+    constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgPos,action) {
     this.name = name;
     this.health = health;
     this.meleeDmg = meleeDmg;
@@ -49,8 +48,7 @@ class Monster {
     this.level = level;
     this.imgLoc = imgLoc;
     this.imgSize = imgSize;
-    this.imgXPos = imgXPos;
-    this.imgYPos = imgYPos;
+    this.imgPos = imgPos;
     this.action = action;
     Monster.allInstances.push(this);
     }
@@ -76,8 +74,8 @@ let preyModalStatus;
 let mutationModalStatus;
 let currentBadSpriteLoc;
 let currentBadSpriteSize;
-let currentBadSpriteX;
-let currentBadSpriteY;
+let currentBadSpritePos;
+
 // let availableChoices = []; //choices for player mutations will be pushed into here. - no no they won't, otherwise it will just grow forever.  It should be in a const in the function.
 // let availablePrey = []; //choices for prey animals will be pushed in here, and shifted out based on level.  Only 3 ever, so the push one will have to shift one out too.
 let availableAttackers = []; // potential monsters that attack us on the way to prey monsters, or after we kill the prey monster.  Keep this to 2-3 at MAX and level relevant.
@@ -138,27 +136,26 @@ healthMeter.addEventListener('onMouseOver', handleHealthMeter);
 //set up initial stuff
 function init() {
     // (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize, imgX, imgY,action)
-    let mutantSpawnling = new Mutant("Spawnling",50,5,1,0,1,0,1,"url(imgs/pixelKnight.png)","333vw","169vw","78vw");
-    let monsterRabbit = new Monster("Rabbit",5,2,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
-    let monsterDeer = new Monster("Deer",20,5,0,0,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterSquirrel = new Monster("Squirrel",15,0,2,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
-    let monsterBadger = new Monster("Badger",20,10,0,2,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterSheep = new Monster("Sheep",20,0,0,2,2,0,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterBear = new Monster("Bear",100,15,0,3,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterWolf = new Monster("Wolf",50,10,0,0,3,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterPixie = new Monster("Pixie",25,0,0,0,3,5,1,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","run");
-    let monsterAnteater = new Monster("Anteater",25,5,0,5,2,0,2,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterTurtle = new Monster("Turtle",85,10,0,10,1,0,3,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantBee = new Monster("GiantBee",150,35,0,1,5,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantSpider = new Monster("GiantSpider",200,25,10,3,3,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterGiantAnt = new Monster("GiantAnt",185,25,0,5,2,0,4,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
-    let monsterDireBear = new Monster("DireBear",350,50,0,10,3,0,5,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
+    let mutantSpawnling = new Mutant("Spawnling",50,5,1,0,1,0,1,"url(imgs/spawnling.png)","contain","center");
+    let monsterRabbit = new Monster("Rabbit",5,2,0,0,2,0,1,"url(imgs/rabbit.png)","contain","-center","run");
+    let monsterDeer = new Monster("Deer",20,5,0,0,2,0,1,"url(imgs/deer.png)","contain","-center","meleeAttack");
+    let monsterSquirrel = new Monster("Squirrel",15,0,2,0,3,0,2,"url(imgs/squirrel.png)","contain","-center","run");
+    let monsterBadger = new Monster("Badger",20,10,0,2,3,0,2,"url(imgs/badger.png)","contain","-center","meleeAttack");
+    let monsterSheep = new Monster("Sheep",20,0,0,2,2,0,1,"url(imgs/sheep.png)","contain","-center","meleeAttack");
+    let monsterBear = new Monster("Bear",100,15,0,3,1,0,3,"url(imgs/bear.png)","contain","-center","meleeAttack");
+    let monsterWolf = new Monster("Wolf",50,10,0,0,3,0,2,"url(imgs/wolf.png)","contain","-center","meleeAttack");
+    let monsterPixie = new Monster("Pixie",25,0,0,0,3,5,1,"url(imgs/pixie.png)","contain","-center","run");
+    let monsterAnteater = new Monster("Anteater",25,5,0,5,2,0,2,"url(imgs/anteater.png)","contain","-center","meleeAttack");
+    let monsterTurtle = new Monster("Turtle",85,10,0,10,1,0,3,"url(imgs/turtle.png)","contain","-center","meleeAttack");
+    let monsterGiantBee = new Monster("GiantBee",150,35,0,1,5,0,4,"url(imgs/giantBeeSm.png)","contain","-center","meleeAttack");
+    let monsterGiantSpider = new Monster("GiantSpider",200,25,10,3,3,0,4,"url(imgs/giantSpider.png)","contain","-center","meleeAttack");
+    let monsterGiantAnt = new Monster("GiantAnt",185,25,50,5,2,0,4,"url(imgs/mutantWolf.png)","contain","-center","meleeAttack");
+    let monsterDireBear = new Monster("DireBear",350,50,0,10,3,0,5,"url(imgs/direBear.png)","contain","-center","meleeAttack");
     player = mutantSpawnling;
     badGuy = monsterRabbit;
     currentBadSpriteLoc = badGuy.imgLoc;
     currentBadSpriteSize = badGuy.imgSize;
-    currentBadSpriteX = badGuy.imgXPos;
-    currentBadSpriteY = badGuy.imgYPos;
+    currentBadSpritePos = badGuy.imgPos;
     startingGoodHealth = player.health;
     startingBadHealth = badGuy.health;
     goodGuyHealth.max = player.health;
@@ -167,12 +164,12 @@ function init() {
     goodGuyHealth.low = Math.floor(player.health*.3);
     goodGuyHealth.high = Math.floor(player.health*.5);
     goodGuyHealth.optimum = Math.floor(player.health*.85);
-    badGuyHealth.max = badGuy.health;
+    badGuyHealth.max = startingBadHealth;
     badGuyHealth.min = 0;
     badGuyHealth.value = badGuy.health;
-    badGuyHealth.low = Math.floor(badGuy.health*.3);
-    badGuyHealth.high = Math.floor(badGuy.health*.6);
-    badGuyHealth.optimum = Math.floor(badGuy.health*.8);
+    badGuyHealth.low = Math.floor(startingBadHealth*.3);
+    badGuyHealth.high = Math.floor(startingBadHealth*.6);
+    badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
     newBattleText = "Battle Log:"
     preyModalStatus = 'none'
     mutationModalStatus = 'none'
@@ -183,21 +180,24 @@ init();
 // console.log(badGuy)
 
 function render(){
+    badGuyHealth.min = 0;
+    badGuyHealth.max = startingBadHealth
     badGuyHealth.value = badGuy.health;
+    badGuyHealth.low = Math.floor(startingBadHealth*.3);
+    badGuyHealth.high = Math.floor(startingBadHealth*.6);
+    badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
     goodGuyHealth.value = player.health;
     attackResultDisplayBad.innerText = attackResultBad;
     attackResultDisplayGood.innerText = attackResultGood;
    //update bad guy sprite
     badGuySprite.style.backgroundImage = currentBadSpriteLoc;
     badGuySprite.style.backgroundSize = currentBadSpriteSize; 
-    badGuySprite.style.backgroundPositionX = currentBadSpriteX;
-    badGuySprite.style.backgroundPositionY = currentBadSpriteY;
+    badGuySprite.style.backgroundPosition = currentBadSpritePos;
     badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
     //update good guy sprite
     goodGuySprite.style.backgroundImage = player.imgLoc;
     goodGuySprite.style.backgroundSize = player.imgSize; 
-    goodGuySprite.style.backgroundPositionX = player.imgXPos;
-    goodGuySprite.style.backgroundPositionY = player.imgYPos;
+    goodGuySprite.style.backgroundPosition = player.imgPos;
     goodGuySprite.innerText = player.name; // comment me out later
     battleLog.innerText = newBattleText
     //Update the button text for player damage (changes due to mutations)
@@ -225,7 +225,8 @@ function handleNav(e) {
         if (confirm('Are you sure? ')) {
             resetGame();
         } else {
-            console.log("you were not")}
+            // console.log("you were not")
+        }
         }
 }
 function resetGame(e) {
@@ -322,8 +323,7 @@ function doEnemyGetsAway() {
     newBattleText = "They got away!"   
     currentBadSpriteLoc = "";
     currentBadSpriteSize = "";
-    currentBadSpriteX = "";
-    currentBadSpriteY = "";
+    currentBadSpritePos = "";
     setTimeout(function() {getPrey()},pauseInterval)
 };
 function doRun(e) {
@@ -348,13 +348,13 @@ function doRun(e) {
 
 function doBadGuyDies() {
     //Change the bad guy picture, reset the health, render it, and give the player some upgrades.
-    currentBadSpriteLoc = "url(imgs/deathEffect.png)";
-    currentBadSpriteSize = "130vw"; 
-    currentBadSpriteX = "0vw";
-    currentBadSpriteY = "-4vw";
+    currentBadSpriteLoc = "url(imgs/poof.gif)";
+    currentBadSpriteSize = "contain"; 
+    currentBadSpritePos = "center";
     // console.log(`doBadGuyDies starting bad health = ${startingBadHealth}`)
     // console.log(`doBadGuyDies badGuy.health = ${badGuy.health}`)
-    render();
+     render();
+    setTimeout(function(){currentBadSpriteLoc = "";render()},1600)
     if (badGuy.name === "DireBear") {setTimeout(function() {doWinGame()},pauseInterval)}
         else {
         setTimeout(function() {getUpgrades()},pauseInterval)  
@@ -376,7 +376,7 @@ function getUpgrades() {
         availableChoices.splice(Math.floor(Math.random()*availableChoices.length), 1);
         }
     }
-    console.log(availableChoices)
+    // console.log(availableChoices)
     createUpgradeBoxes(availableChoices);
 }
 function createUpgradeBoxes(e) {
@@ -392,9 +392,14 @@ function handleMutationModalClick(e) {
     if (e.target.tagName === "BUTTON") {
         const selection = e.target.innerText
         if (selection === 'health') {
-             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.5+.5)),1)
+            player.health += Math.floor((goodGuyHealth.max-goodGuyHealth.value)*.8)
+            player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.5+.5)),1)
+            player.level += .05
+             
         } else {
-             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.75+.25)),1)    
+            player.health += Math.floor((goodGuyHealth.max-goodGuyHealth.value)*.4)
+            player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.75+.25)),1) 
+            player.level += .1   
             }
             mutationModalStatus = "none";
         getPrey()
@@ -425,15 +430,14 @@ function handlePreyModalClick(e) {
     if (e.target.tagName === "BUTTON") {
         let monsterHolder;
         const currentMonsterName = e.target.innerText
-        if (Math.random() > .8) {
+        if (Math.random() > .2) {
             monsterHolder = Monster.allInstances.filter(function(e){
                 return e.name === currentMonsterName})
             nextMonster = monsterHolder[0]
         } else {
             let newPredator = Monster.allInstances.filter(function(e){
                 return e.level <= player.level + 2 &&  e.level >= player.level && e.action !== "run"
-                })
-                console.log(newPredator)
+                })                
             nextMonster = newPredator[Math.floor(Math.random()*newPredator.length)]
 
             //This grabs up an array of all the monsters, then randomly picks one that is up to 2 levels higher than the player, and doesn't run.
@@ -447,8 +451,7 @@ function handlePreyModalClick(e) {
         preyModalStatus = "none";
         currentBadSpriteLoc = badGuy.imgLoc;
         currentBadSpriteSize = badGuy.imgSize; 
-        currentBadSpriteX = badGuy.imgXPos;
-        currentBadSpriteY = badGuy.imgYPos;
+        currentBadSpritePos = badGuy.imgPos;
         render()
     }
 }
@@ -460,10 +463,9 @@ function doWinGame() {
     render()
 }
 function doPlayerDies(){
-    player.imgLoc = "url(imgs/deathEffect.png)";
-    player.imgSize = "130vw";
-    player.imgXPos = "0vw";
-    player.imgYPos = "-4vw";
+    player.imgLoc = "url(imgs/poof.png)";
+    player.imgSize = "contain";
+    player.imgPos = "center";
     newBattleText = "You have died... better luck next time!"
     render()
     //add in something else for a "Game over" type screen or something...

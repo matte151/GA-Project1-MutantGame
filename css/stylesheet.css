@@ -47,6 +47,9 @@ nav > div:last-child {
     background-position-x: -27vw;
     background-position-y: -38vh; */
     grid-area: 1/5/6/7;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
 }
 .attackResultDisplayGood{
     background-color: #f55252;
@@ -66,6 +69,7 @@ nav > div:last-child {
 }
 .goodGuySprite {
     grid-area: 7/1/10/3;
+    background-repeat: no-repeat;
 }
 .goodGuyHealth{
     display: flex;
