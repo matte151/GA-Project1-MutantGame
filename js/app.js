@@ -15,7 +15,7 @@ class Player {
     this.name = name;
 }
 }
-const pauseInterval = 500
+const pauseInterval = 1000
 //set up basic class starting with just a Mutant.
 class Mutant extends Player {
     constructor (name, health, meleeDmg, rangedDmg, armor, speed, magic, level, imgLoc,imgSize,imgXPos,imgYPos) {
@@ -72,6 +72,12 @@ let nextMonster;
 let player;
 let badGuy;
 let newBattleText;
+let preyModalStatus;
+let mutationModalStatus;
+let currentBadSpriteLoc;
+let currentBadSpriteSize;
+let currentBadSpriteX;
+let currentBadSpriteY;
 // let availableChoices = []; //choices for player mutations will be pushed into here. - no no they won't, otherwise it will just grow forever.  It should be in a const in the function.
 // let availablePrey = []; //choices for prey animals will be pushed in here, and shifted out based on level.  Only 3 ever, so the push one will have to shift one out too.
 let availableAttackers = []; // potential monsters that attack us on the way to prey monsters, or after we kill the prey monster.  Keep this to 2-3 at MAX and level relevant.
@@ -149,10 +155,12 @@ function init() {
     let monsterDireBear = new Monster("DireBear",350,50,0,10,3,0,5,"url(imgs/giantBee.png)","85vw","-28vw","-26vw","meleeAttack");
     player = mutantSpawnling;
     badGuy = monsterRabbit;
+    currentBadSpriteLoc = badGuy.imgLoc;
+    currentBadSpriteSize = badGuy.imgSize;
+    currentBadSpriteX = badGuy.imgXPos;
+    currentBadSpriteY = badGuy.imgYPos;
     startingGoodHealth = player.health;
     startingBadHealth = badGuy.health;
-    console.log(`init starting bad health = ${startingBadHealth}`)
-    console.log(`init badGuy.health = ${badGuy.health}`)
     goodGuyHealth.max = player.health;
     goodGuyHealth.min = 0;
     goodGuyHealth.value = player.health;
@@ -165,10 +173,9 @@ function init() {
     badGuyHealth.low = Math.floor(badGuy.health*.3);
     badGuyHealth.high = Math.floor(badGuy.health*.6);
     badGuyHealth.optimum = Math.floor(badGuy.health*.8);
-    meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
-    rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
-    spellButton.innerText = `Spell (${Math.floor(player.magic*.5)} - ${player.magic})`;
     newBattleText = "Battle Log:"
+    preyModalStatus = 'none'
+    mutationModalStatus = 'none'
     render();
 }
 init();
@@ -181,10 +188,10 @@ function render(){
     attackResultDisplayBad.innerText = attackResultBad;
     attackResultDisplayGood.innerText = attackResultGood;
    //update bad guy sprite
-    badGuySprite.style.backgroundImage = badGuy.imgLoc;
-    badGuySprite.style.backgroundSize = badGuy.imgSize; 
-    badGuySprite.style.backgroundPositionX = badGuy.imgXPos;
-    badGuySprite.style.backgroundPositionY = badGuy.imgYPos;
+    badGuySprite.style.backgroundImage = currentBadSpriteLoc;
+    badGuySprite.style.backgroundSize = currentBadSpriteSize; 
+    badGuySprite.style.backgroundPositionX = currentBadSpriteX;
+    badGuySprite.style.backgroundPositionY = currentBadSpriteY;
     badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
     //update good guy sprite
     goodGuySprite.style.backgroundImage = player.imgLoc;
@@ -193,6 +200,12 @@ function render(){
     goodGuySprite.style.backgroundPositionY = player.imgYPos;
     goodGuySprite.innerText = player.name; // comment me out later
     battleLog.innerText = newBattleText
+    //Update the button text for player damage (changes due to mutations)
+    meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
+    rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
+    spellButton.innerText = `Spell (${Math.floor(player.magic*.5)} - ${player.magic})`;
+    chooseMutationModal.style.display = mutationModalStatus;
+    choosePreyModal.style.display = preyModalStatus;
 }
 
 function handleClick(e) {
@@ -204,9 +217,20 @@ function handleClick(e) {
           if (e.target.className === "runButton") {doRun(player.speed);}
             e.target.disabled=true;
     setTimeout(function(){e.target.disabled=false;},pauseInterval)
-render();
-}
+    }
 };
+//reset function on the nav bar
+function handleNav(e) {
+    if (e.target.innerText === "Play") {
+        if (confirm('Are you sure? ')) {
+            resetGame();
+        } else {
+            console.log("you were not")}
+        }
+}
+function resetGame(e) {
+    init()
+}
 //initiative check??? Stretch, might be nice to stick that in, it'd be cool
 
 //make an attack roll, check to see if it hits, if it does, then roll damage in a sperate function.  4 result (crit, hit/player block, both hit, player only hit)
@@ -214,28 +238,44 @@ function doAttack(e, f) {
     const dieRoll = Math.random();
     if (dieRoll >.8) {
         attackResultGood = "Critical Hit!!";
-        damageBadGuy(2*e, e, f)
+        damageBadGuy(2*e, e, f,"player")
     } else if (dieRoll > .5) {
         attackResultGood = "Hit!";
-         damageBadGuy(e,.5*e, f)
+         damageBadGuy(e,.5*e, f,"player")
     } else if (dieRoll >.15) {
         attackResultGood = "Glancing Hit!";
-        damageBadGuy(.5*e,0, f);
+        damageBadGuy(.5*e,0, f,"player");
     } else {
         attackResultGood = "I miss!!";
-        damageBadGuy(0, 0, f);
+        damageBadGuy(0, 0, f,"player");
     }
+}
+function damageBadGuy(e, f, g, h) {
+    // make them take damage, do not render here, we are returning back to the attack check, which renders there.
+    newBadHealth = Math.floor(badGuy.health - ((Math.random() * e + f)-badGuy.armor*g));
+    badGuy.health = newBadHealth
+    render()
+    if (h==="player"){
+        if(badGuy.health <= 0) {
+            doBadGuyDies()} 
+            else {doBadGuyAction()
+            }
+        } else if (h==="run"){
+            if(badGuy.health <= 0) {
+                doBadGuyDies()} else {
+                render() }
+        }
 }
 function doBadGuyAction(e) {
     //Run if it's a run action
     if (badGuy.action === "run") {
-        newBattleText = "Your prey tries to run!"
-        render();
-        setInterval(function(){ 
-            if (Math.random()*badGuy.speed > Math.random()*player.speed) {doEnemyRan()} else {doEnemyRunFail()}
-        })
+        battleLog.innerText = "Your prey tries to run!"
+        render()
+        setTimeout(function(){ 
+            doEnemyRan()
+        },pauseInterval)
     }
-    //Melee Attack
+    //Melee Attack note the ,1 or ,0 is to ignore armor (by multiplying by 0 in the damage formula) if it's a magic attack)
     if (badGuy.action === "meleeAttack") {doBadGuyAttack(badGuy.meleeDmg,1)}
     //Ranged Attack
     if (badGuy.action === 'rangedAttack') {doBadGuyAttack(badGuy.rangedDmg,1)}
@@ -259,99 +299,76 @@ function doBadGuyAttack(e, f) {
         }
     }
 
-function damageBadGuy(e, f, g) {
-    // make them take damage, do not render here, we are returning back to the attack check, which renders there.
-    newBadHealth = Math.floor(badGuyHealth.value - ((Math.random() * e + f)-badGuy.armor*g));
-    badGuy.health = newBadHealth
-    if(badGuy.health <= 0) {doBadGuyDies()} else {doBadGuyAction()};
-}
 function damagePlayer(e, f, g) {
  // make them take damage, do not render here, we are returning back to the attack check, which renders there.
     newGoodHealth = Math.floor(goodGuyHealth.value - ((Math.random() * e + f)-player.armor*g));
     player.health = newGoodHealth
-    if(player.health<=0) {doPlayerDies()}
+    if(player.health<=0) {doPlayerDies()} else {render()}
 }
 
 function doEnemyRan(e) {
     const playerSpeed = Math.random()*player.speed
     const badSpeed = Math.random()*badGuy.speed
     const dmgTaken = Math.max(player.meleeDmg,player.rangedDmg,player.magic)
-    if (playerSpeed > .25+badSpeed){damageBadGuy(dmgTaken*2,dmgTaken,0)}
-    if (playerSpeed > badSpeed){damageBadGuy(dmgTaken,dmgTaken*.5,0)}
-    if (badSpeed >= playerSpeed){damageBadGuy(dmgTaken*.5,0,0)}
-    if (badSpeed >= .25+playerSpeed){doEnemyGetsAway()}
+    if (playerSpeed > .25+badSpeed && Math.floor(Math.random()*dmgTaken*2+dmgTaken) >= badGuy.health){
+            newBattleText = "Your prey failed to escape you and you consumed them!"
+            doBadGuyDies()}
+    
+    else {doEnemyGetsAway()}
     //get new choices and stuff here.
 };
-function doEnemyRunFail(){
-    newBattleText = "They failed to run away!"
-}
+
 function doEnemyGetsAway() {
     newBattleText = "They got away!"   
-    badGuy.imgLoc = "";
-    badGuy.imgSize = "";
-    badGuy.imgXPos = "";
-    badGuy.imgYPos = "";
+    currentBadSpriteLoc = "";
+    currentBadSpriteSize = "";
+    currentBadSpriteX = "";
+    currentBadSpriteY = "";
     setTimeout(function() {getPrey()},pauseInterval)
 };
 function doRun(e) {
     if (badGuy.action === "run") {
         newBattleText = "You get away!"
+        render()
         setTimeout(function() {getPrey()},pauseInterval)
     } else {
             const playerSpeed = Math.random()*player.speed
             const badSpeed = Math.random()*badGuy.speed
          if (playerSpeed > badSpeed) {
             newBattleText = "You get away!"
+            render()
             setTimeout(function() {getPrey()},pauseInterval)
         } else {
             newBattleText = "You fail to get away!"
+            render()
             setTimeout(function() {doBadGuyAction()},pauseInterval)
         }
     }
-render()    
-}
-function handleNav(e) {
-    if (e.target.innerText === "Play") {
-        if (confirm('Are you sure? ')) {
-            resetGame();
-        } else {
-            console.log("you were not")}
-        }
-render()    
 }
 
-function doPlayerDies(){
-    player.imgLoc = "url(imgs/deathEffect.png)";
-    player.imgSize = "130vw";
-    player.imgXPos = "0vw";
-    player.imgYPos = "-4vw";
-    //add in something else for a "Game over" type screen or something...
-}
 function doBadGuyDies() {
     //Change the bad guy picture, reset the health, render it, and give the player some upgrades.
-    badGuy.imgLoc = "url(imgs/deathEffect.png)";
-    badGuy.imgSize = "130vw"; 
-    badGuy.imgXPos = "0vw";
-    badGuy.imgYPos = "-4vw";
-    console.log(`doBadGuyDies starting bad health = ${startingBadHealth}`)
-    console.log(`doBadGuyDies badGuy.health = ${badGuy.health}`)
-    badGuy.health = startingBadHealth;
-    if (badGuy.name === "DireBear") {doWinGame()}{
-        render();
-        getUpgrades();  
-    }
+    currentBadSpriteLoc = "url(imgs/deathEffect.png)";
+    currentBadSpriteSize = "130vw"; 
+    currentBadSpriteX = "0vw";
+    currentBadSpriteY = "-4vw";
+    // console.log(`doBadGuyDies starting bad health = ${startingBadHealth}`)
+    // console.log(`doBadGuyDies badGuy.health = ${badGuy.health}`)
+    render();
+    if (badGuy.name === "DireBear") {setTimeout(function() {doWinGame()},pauseInterval)}
+        else {
+        setTimeout(function() {getUpgrades()},pauseInterval)  
+        }
 
 }
-function resetGame(e) {
-    init()
-}
+
 function getUpgrades() {
     const availableChoices = [];
+    badGuy.health=startingBadHealth; // had to put this in here too so it generates in the options.
     for (const property in badGuy) {
         if (badGuy[property] > 0 && property !=='level') {
             availableChoices.push(property)
         }
-
     }
     if (availableChoices.length > 3) {
         //remove random elements from the array until it's 3 or under
@@ -366,12 +383,24 @@ function createUpgradeBoxes(e) {
     mutationSelect1.innerText = e[0]
     mutationSelect2.innerText = e[1]
     mutationSelect3.innerText = e[2]
-    choosePreyModal.style.display = "none"
-    chooseMutationModal.style.display = "block";
-
+    preyModalStatus = "none";
+    mutationModalStatus= "block";
+    render()
+}
+function handleMutationModalClick(e) {
+    // console.log(e.target.innerText)
+    if (e.target.tagName === "BUTTON") {
+        const selection = e.target.innerText
+        if (selection === 'health') {
+             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.5+.5)),1)
+        } else {
+             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.75+.25)),1)    
+            }
+            mutationModalStatus = "none";
+        getPrey()
+    }   
 }
 function getPrey(e) {
-
     const availablePrey = Monster.allInstances.filter(function(e){
         return e.level <= player.level    
     })
@@ -387,27 +416,16 @@ function createPreyBoxes(e) {
     preySelect1.innerText = e[0].name
     preySelect2.innerText = e[1].name
     preySelect3.innerText = e[2].name
-    chooseMutationModal.style.display = "none";
-    choosePreyModal.style.display = "block";
+    mutationModalStatus = "none";
+    preyModalStatus = "block";
+    render()
 }
-function handleMutationModalClick(e) {
-    // console.log(e.target.innerText)
-    if (e.target.tagName === "BUTTON") {
-        const selection = e.target.innerText
-        if (selection === 'health') {
-             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.5+.5)),1)
-        } else {
-             player[selection] += Math.max(Math.floor(badGuy[selection]*(Math.random()*.75+.25)),1)    
-            }
-        chooseMutationModal.style.display = "none";
-        getPrey()
-    }   
-}
+
 function handlePreyModalClick(e) {
     if (e.target.tagName === "BUTTON") {
         let monsterHolder;
         const currentMonsterName = e.target.innerText
-        if (Math.random() > .5) {
+        if (Math.random() > .8) {
             monsterHolder = Monster.allInstances.filter(function(e){
                 return e.name === currentMonsterName})
             nextMonster = monsterHolder[0]
@@ -420,12 +438,17 @@ function handlePreyModalClick(e) {
 
             //This grabs up an array of all the monsters, then randomly picks one that is up to 2 levels higher than the player, and doesn't run.
             }
+        badGuy.health = startingBadHealth //set the health of the old monster to it's previous starting health
         badGuy = nextMonster
         // console.log(`handlePreyModal starting bad health = ${startingBadHealth}`)
         // console.log(`HandlePReyModal badGuy.health = ${badGuy.health}`)
         startingBadHealth = badGuy.health
         newBattleText = `A wild ${badGuy.name} appears! (sorry couldn't help it...)`
-        choosePreyModal.style.display = "none";
+        preyModalStatus = "none";
+        currentBadSpriteLoc = badGuy.imgLoc;
+        currentBadSpriteSize = badGuy.imgSize; 
+        currentBadSpriteX = badGuy.imgXPos;
+        currentBadSpriteY = badGuy.imgYPos;
         render()
     }
 }
@@ -435,4 +458,13 @@ function handleHealthMeter(e) {
 function doWinGame() {
     newBattleText = "You have become the apex predator!  Congratulations!"
     render()
+}
+function doPlayerDies(){
+    player.imgLoc = "url(imgs/deathEffect.png)";
+    player.imgSize = "130vw";
+    player.imgXPos = "0vw";
+    player.imgYPos = "-4vw";
+    newBattleText = "You have died... better luck next time!"
+    render()
+    //add in something else for a "Game over" type screen or something...
 }
