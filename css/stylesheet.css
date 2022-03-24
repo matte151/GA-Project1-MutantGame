@@ -88,7 +88,7 @@ nav > div:last-child {
     background-color:transparent;
     justify-content: center;
     align-items: center;
-    grid-area: 9/1/10/2;
+    grid-area: 9/1/10/3;
 }
 .inputBar{
     grid-area: 10/1/11/7;
@@ -214,21 +214,67 @@ nav > div:last-child {
     cursor: pointer;
   }
 @media (max-width: 600px) {
+    .mainDiv {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+        width: 100%;
+        height: 100%;
+    }
     .badGuySprite {
-        grid-area: 1/4/6/7;
+        grid-area: 1/3/3/5;
     }
     .attackResultDisplayBad{
         background-color: #18bd08;
-        grid-area: 1/2/2/4;
+        grid-area: 1/2/2/3;
     }
     .goodGuySprite {
-        grid-area: 7/1/10/4;   
+        grid-area: 3/1/5/3   
     }
     .attackResultDisplayGood{
         background-color: #f55252;
-        grid-area: 7/4/8/5;
+        grid-area: 3/3/4/4;
     }
     .badGuyHealth {
-        grid-area: 6/4/6/7;
+        grid-area: 2/3/3/5;
+    }.goodGuyHealth {
+        grid-area: 4/1/5/3;
+      }
+    .inputBar{
+        grid-area: 5/1/7/5;
+        display:grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        
     }
+    .meleeButtonDiv {
+        grid-area: 2/1/3/2;
+    }
+    .meleeButton{
+        font-size:1em;
+    }
+    .rangedButtonDiv {
+        grid-area: 2/2/3/3;
+    }
+    .rangedButton {
+        font-size:1em;
+    }
+    .spellButtonDiv {
+        grid-area: 2/3/3/4;
+    }
+    .spellButton {
+        font-size:1em;
+    }
+    .log {
+        grid-area: 1/1/2/5;
+        font-size:1.5em;
+    }
+    .runDiv {
+        grid-area: 2/4/3/5;
+
+    }
+    .runButton {
+        font-size:1em;
+    }
+
 }
