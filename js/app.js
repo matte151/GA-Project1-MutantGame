@@ -170,6 +170,8 @@ function init() {
     badGuyHealth.low = Math.floor(startingBadHealth*.3);
     badGuyHealth.high = Math.floor(startingBadHealth*.6);
     badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
+    attackResultBad = "";
+    attackResultGood = "";
     newBattleText = "Battle Log:"
     preyModalStatus = 'none'
     mutationModalStatus = 'none'
@@ -187,19 +189,24 @@ function render(){
     badGuyHealth.high = Math.floor(startingBadHealth*.6);
     badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
     goodGuyHealth.value = player.health;
+    //This part sets up the battle text to fade in and out.
     attackResultDisplayBad.innerText = attackResultBad;
+    setTimeout(function(){attackResultDisplayBad.classList.toggle('fade')},1000);
     attackResultDisplayGood.innerText = attackResultGood;
+    setTimeout(function(){attackResultDisplayGood.classList.toggle('fade')},1000);
+    battleLog.innerText = newBattleText
+    // setTimeout(function(){battleLog.classList.toggle('fade')},1000);
    //update bad guy sprite
     badGuySprite.style.backgroundImage = currentBadSpriteLoc;
     badGuySprite.style.backgroundSize = currentBadSpriteSize; 
     badGuySprite.style.backgroundPosition = currentBadSpritePos;
-    badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
+    // badGuySprite.innerText = badGuy.name;  //comment me out later, it's in here for testing to make sure it changes later instead of images.
     //update good guy sprite
     goodGuySprite.style.backgroundImage = player.imgLoc;
     goodGuySprite.style.backgroundSize = player.imgSize; 
     goodGuySprite.style.backgroundPosition = player.imgPos;
-    goodGuySprite.innerText = player.name; // comment me out later
-    battleLog.innerText = newBattleText
+    // goodGuySprite.innerText = player.name; // comment me out later
+
     //Update the button text for player damage (changes due to mutations)
     meleeButton.innerText = `Melee (${Math.floor(player.meleeDmg*.5)} - ${player.meleeDmg})`;
     rangedButton.innerText = `Ranged (${Math.floor(player.rangedDmg*.5)} - ${player.rangedDmg})`;
@@ -238,13 +245,13 @@ function resetGame(e) {
 function doAttack(e, f) {
     const dieRoll = Math.random();
     if (dieRoll >.8) {
-        attackResultGood = "Critical Hit!!";
+        attackResultGood = "Critical!!";
         damageBadGuy(2*e, e, f,"player")
     } else if (dieRoll > .5) {
         attackResultGood = "Hit!";
          damageBadGuy(e,.5*e, f,"player")
     } else if (dieRoll >.15) {
-        attackResultGood = "Glancing Hit!";
+        attackResultGood = "Glance!";
         damageBadGuy(.5*e,0, f,"player");
     } else {
         attackResultGood = "I miss!!";
@@ -253,7 +260,8 @@ function doAttack(e, f) {
 }
 function damageBadGuy(e, f, g, h) {
     // make them take damage, do not render here, we are returning back to the attack check, which renders there.
-    newBadHealth = Math.floor(badGuy.health - ((Math.random() * e + f)-badGuy.armor*g));
+    newBadHealth = Math.floor(badGuy.health - Math.max(((Math.random() * e + f)-badGuy.armor*g),0));
+    newBattleText = `You deal ${badGuy.health-newBadHealth} damage!`
     badGuy.health = newBadHealth
     render()
     if (h==="player"){
@@ -302,7 +310,7 @@ function doBadGuyAttack(e, f) {
 
 function damagePlayer(e, f, g) {
  // make them take damage, do not render here, we are returning back to the attack check, which renders there.
-    newGoodHealth = Math.floor(goodGuyHealth.value - ((Math.random() * e + f)-player.armor*g));
+    newGoodHealth = Math.floor(goodGuyHealth.value - Math.max(((Math.random() * e + f)-player.armor*g),0));
     player.health = newGoodHealth
     if(player.health<=0) {doPlayerDies()} else {render()}
 }
@@ -312,7 +320,8 @@ function doEnemyRan(e) {
     const badSpeed = Math.random()*badGuy.speed
     const dmgTaken = Math.max(player.meleeDmg,player.rangedDmg,player.magic)
     if (playerSpeed > .25+badSpeed && Math.floor(Math.random()*dmgTaken*2+dmgTaken) >= badGuy.health){
-            newBattleText = "Your prey failed to escape you and you consumed them!"
+            newBattleText = "Your prey failed to escape. You consumed them!"
+            render()
             doBadGuyDies()}
     
     else {doEnemyGetsAway()}
@@ -324,6 +333,7 @@ function doEnemyGetsAway() {
     currentBadSpriteLoc = "";
     currentBadSpriteSize = "";
     currentBadSpritePos = "";
+    render()
     setTimeout(function() {getPrey()},pauseInterval)
 };
 function doRun(e) {
@@ -463,7 +473,7 @@ function doWinGame() {
     render()
 }
 function doPlayerDies(){
-    player.imgLoc = "url(imgs/poof.png)";
+    player.imgLoc = "url(imgs/poof.gif)";
     player.imgSize = "contain";
     player.imgPos = "center";
     newBattleText = "You have died... better luck next time!"

@@ -52,12 +52,24 @@ nav > div:last-child {
     background-position: center;
 }
 .attackResultDisplayGood{
-    background-color: #f55252;
+    color: #6e0505;
     grid-area: 7/3/8/4;
+    opacity: 1;
+    transition: opacity 1s;
+    font-size: 2em;
+}
+.attackResultDisplayGood.fade {
+    opacity: 0;
 }
 .attackResultDisplayBad{
-    background-color: #18bd08;
+    color: #6e0505;
     grid-area: 1/4/2/5;
+    opacity: 1;
+    transition: opacity 1s;
+    font-size: 2em;
+}
+.attackResultDisplayBad.fade {
+    opacity: 0;
 }
 .badGuyHealth {
     background-color:transparent;
@@ -123,7 +135,12 @@ nav > div:last-child {
     color: #6e0505;
     font-size: 2em;
     grid-area: 1/4/2/6;
+    opacity: 1;
+    transition: opacity 1s;
 
+}
+.log.fade {
+    opacity: 0;
 }
 #badGuyHealthMeter {
     display: block;
