@@ -76,6 +76,7 @@ const spellButton = document.querySelector('.spellButton');
 const anyModal = document.querySelector('.modal')
 const choosePreyModal = document.querySelector('#choosePreyModal')
 const chooseMutationModal = document.querySelector('#chooseMutationModal')
+const instructionModal = document.querySelector('#instructionModal')
 const closeMutation = document.querySelector('#closeMutation');
 const closePrey = document.querySelector('#closePrey');
 const preySelect1 = document.querySelector('#preySelect1')
@@ -115,9 +116,9 @@ function init() {
     let monsterTurtle = new Monster("Turtle",85,10,0,20,1,0,3,"url(imgs/turtle.png)","contain","-center","meleeAttack");
     let monsterGiantBee = new Monster("GiantBee",100,30,0,1,6,0,4,"url(imgs/giantBeeSm.png)","contain","-center","meleeAttack");
     let monsterGiantSpider = new Monster("GiantSpider",200,25,10,3,3,0,4,"url(imgs/giantSpider.png)","contain","-center","meleeAttack");
-    let monsterGiantAnt = new Monster("GiantAnt",185,10,50,5,2,0,4,"url(imgs/mutantWolf.png)","contain","-center","rangedAttack");
+    let monsterGiantAnt = new Monster("GiantAnt",185,10,35,5,2,0,5,"url(imgs/mutantWolf.png)","contain","-center","rangedAttack");
     let monsterDemon = new Monster("Demon",100,0,0,5,3,20,4,"url(imgs/demon.png)","contain","-center","spellAttack");
-    let monsterDireBear = new Monster("DireBear",350,50,0,10,3,0,5,"url(imgs/direBear.png)","contain","-center","meleeAttack");
+    let monsterDireBear = new Monster("DireBear",250,40,0,10,3,0,6,"url(imgs/direBear.png)","contain","-center","meleeAttack");
     
     player = mutantSpawnling;
     badGuy = monsterRabbit;
@@ -140,14 +141,17 @@ function init() {
     badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
     attackResultBad = "";
     attackResultGood = "";
-    newBattleText = "Battle Log:"
-    preyModalStatus = 'none'
-    mutationModalStatus = 'none'
-    render();
+    newBattleText = "Battle Log:";
+    preyModalStatus = 'none';
+    mutationModalStatus = 'none';
+//This is displaying the instruction block, and giving them 12 seconds to read it before going to the main game.
+    instructionModal.style.display = 'block';
+    setTimeout(function(){render()},12000);
 }
 init();
 //Render function, controlls all updates to dom.
 function render(){
+    instructionModal.style.display ='none'
     badGuyHealth.min = 0;
     badGuyHealth.max = startingBadHealth
     badGuyHealth.value = badGuy.health;
@@ -155,6 +159,7 @@ function render(){
     badGuyHealth.high = Math.floor(startingBadHealth*.6);
     badGuyHealth.optimum = Math.floor(startingBadHealth*.8);
     goodGuyHealth.value = player.health;
+    goodGuyHealth.max = Math.max(player.health,startingGoodHealth);
     //This part sets up the battle text to fade in and out.
     attackResultDisplayBad.innerText = attackResultBad;
     setTimeout(function(){attackResultDisplayBad.classList.toggle('fade')},1000);
@@ -398,9 +403,9 @@ function handlePreyModalClick(e) {
             nextMonster = monsterHolder[0]
         } else {
             let newPredator = Monster.allInstances.filter(function(e){
-                return e.level <= player.level + 1.5 &&  e.level >= player.level && e.action !== "run"
-                })                
-            nextMonster = newPredator[Math.floor(Math.random()*newPredator.length)]
+                return (e.level <= player.level + 1.5 &&  e.level >= player.level && e.action !== "run") || (e.level <= player.level + 1.5 &&  e.level >= 4 && e.action !== "run")
+                })
+                nextMonster = newPredator[Math.floor(Math.random()*newPredator.length)]
             //This grabs up an array of all the monsters, then randomly picks one that is up to 2 levels higher than the player, and doesn't run.
             }
         badGuy.health = startingBadHealth //set the health of the old monster to it's previous starting health
